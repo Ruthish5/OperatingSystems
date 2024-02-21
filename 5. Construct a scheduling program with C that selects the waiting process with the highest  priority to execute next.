@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_PROCESSES 10
+
+typedef struct {
+    int id;
+    int priority;
+} Process;
+
+typedef struct {
+    Process heap[MAX_PROCESSES];
+    int size;
+} PriorityQueue;
+
+void initialize(PriorityQueue *pq);
+void enqueue(PriorityQueue *pq, Process process);
+Process dequeue(PriorityQueue *pq);
+int isEmpty(PriorityQueue *pq);
+
+int main() {
+    PriorityQueue pq;
+    initialize(&pq);
+
+    Process p1 = {1, 3};
+    Process p2 = {2, 1};
+    Process p3 = {3, 2};
+
+    enqueue(&pq, p1);
+    enqueue(&pq, p2);
+    enqueue(&pq, p3);
+
+    while (!isEmpty(&pq)) {
+        Process current = dequeue(&pq);
+        printf("Executing process %d with priority %d\n", current.id, current.priority);
+    }
+
+    return 0;
+}
+
+void initialize(PriorityQueue *pq) {
+    pq->size = 0;
+}
+
+void enqueue(PriorityQueue *pq, Process process) {
+    if (pq->size == MAX_PROCESSES) {
+        printf("Queue is full!\n");
+        return;
+    }
+
+    pq->heap[pq->size] = process;
+    int current = pq->size;
+    int parent = (current - 1) / 2;
+
+    while (current > 0 && pq->heap[current].priority > pq->heap[parent].priority) {
+        Process temp = pq->heap[parent];
+        pq->heap[parent] = pq->heap[current];
+        pq->heap[current] = temp;
+
+        current = parent;
+        parent = (current - 1) / 2;
+    }
+
+    pq->size++;
+}
+
+Process dequeue(PriorityQueue *pq) {
+    if (isEmpty(pq)) {
+        printf("Queue is empty!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Process root = pq->heap[0];
+
+    pq->size--;
+    pq->heap[0] = pq->heap[pq->size];
+
+    int current = 0;
+    int leftChild, rightChild, maxChild;
+    while (1) {
+        leftChild = 2 * current + 1;
+        rightChild = 2 * current + 2;
+        maxChild = current;
+
+        if (leftChild < pq->size && pq->heap[leftChild].priority > pq->heap[maxChild].priority) {
+            maxChild = leftChild;
+        }
+        if (rightChild < pq->size && pq->heap[rightChild].priority > pq->heap[maxChild].priority) {
+            maxChild = rightChild;
+        }
+
+        if (maxChild == current)
+            break;
+
+        Process temp = pq->heap[current];
+        pq->heap[current] = pq->heap[maxChild];
+        pq->heap[maxChild] = temp;
+
+        current = maxChild;
+    }
+
+    return root;
+}
+
+int isEmpty(PriorityQueue *pq) {
+    return pq->size == 0;
+}
