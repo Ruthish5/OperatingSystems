@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+int main() {
+  
+    int fd = open("example.txt", O_CREAT | O_WRONLY, 0644); 
+    if (fd == -1) {
+        perror("Error creating file");
+        exit(EXIT_FAILURE);
+    }
+
+    const char *content = "This is a test file.\n";
+    if (write(fd, content, strlen(content)) == -1) {
+        perror("Error writing to file");
+        exit(EXIT_FAILURE);
+    }
+
+    if (close(fd) == -1) {
+        perror("Error closing file");
+        exit(EXIT_FAILURE);
+    }
+
+    if (chmod("example.txt", 0640) == -1) { 
+        perror("Error changing file permissions");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("File 'example.txt' created and written successfully.\n");
+    printf("Now let's check the file permissions:\n");
+
+    system("ls -l example.txt");
+
+    return 0;
+}
